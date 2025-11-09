@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - PPC System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">PPC System Admin</div>
+            <a href="#" class="money-link">💰 รับเงิน</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <h1>Admin Dashboard</h1>
+        <p>Email: <strong>nontakorn.ppc@gmail.com</strong></p>
+        
+        <section class="admin-section">
+            <h2>Member List (156 members)</h2>
+            <div class="table-container">
+                <table id="memberTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ชื่อ</th>
+                            <th>อีเมล</th>
+                            <th>เบอร์โทร</th>
+                            <th>สถานะ</th>
+                            <th>VIP</th>
+                            <th>เข้าร่วม</th>
+                            <th>ยอดขาย</th>
+                        </tr>
+                    </thead>
+                    <tbody id="memberTableBody"></tbody>
+                </table>
+            </div>
+            
+            <div class="controls">
+                <input type="text" id="searchInput" placeholder="ค้นหา สมชาย...">
+                <select id="filterVIP">
+                    <option value="all">ทั้งหมด</option>
+                    <option value="vip">VIP Only</option>
+                </select>
+                <button onclick="exportCSV()">📥 Export CSV</button>
+            </div>
+        </section>
+        
+        <section class="admin-section">
+            <h2>Commission Calculator</h2>
+            <input type="number" id="memberCount" placeholder="จำนวนสมาชิก" value="156">
+            <p>ค่าคมิชชั่น: <strong id="commissionResult">46644฿</strong></p>
+        </section>
+        
+        <section class="admin-section">
+            <h2>Activity Feed (Real-time)</h2>
+            <div id="activityFeed"></div>
+        </section>
+    </main>
+    
+    <script src="script.js"></script>
+</body>
+</html>
