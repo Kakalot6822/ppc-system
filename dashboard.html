@@ -4,7 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - PPC System</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {background:#f8f9fc; font-family:'Quicksand',sans-serif; color:#333;}
+        .navbar {background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.04);}
+        .nav-container {max-width:940px; margin:auto; display:flex; justify-content:space-between; align-items:center; padding:1rem 2rem;}
+        .logo {font-size:1.7rem; font-weight:700; color:#3445ff;}
+        .money-link {background:#ffd600; color:#333; padding:8px 18px; border-radius:50px; text-decoration:none; font-weight:700;}
+        .container {max-width:940px; margin:auto; padding:2rem;}
+        h1 {font-size:2.3rem; margin-bottom:.4rem;}
+        h2 {margin-top:2.6rem; font-size:1.5rem;}
+        .admin-section {background:#fff; border-radius:16px; margin-bottom:2rem; box-shadow:0 4px 12px rgba(0,0,0,0.04); padding:2rem;}
+        .table-container {overflow-x:auto;}
+        table {width:100%; border-collapse:collapse; margin-top:1.2rem;}
+        th,td {border-bottom:1px solid #eee; padding:.55rem .8rem;}
+        th {background:#f6f8fa;}
+        tr:hover td {background:#eaf3ff;}
+        .controls {margin:1.4rem 0 0 0; display:flex; gap:1rem; align-items:center;}
+        input,select,button {padding:.55rem .9rem; font-size:1rem; border-radius:8px; border:1px solid #ddd;}
+        button {background:#3445ff; color:#fff; border:none; font-weight:700; cursor:pointer;}
+        button:hover {background:#5777ff;}
+        .money-link:hover {background:#fff176;}
+        #activityFeed {margin-top:1rem;}
+        .feed-item {background:#f2f5ff; padding:.7rem 1rem; margin-bottom:.7rem; border-radius:10px;}
+        @media(max-width:600px){
+            .container,.admin-section {padding:1rem;}
+            .nav-container {padding:0.8rem 1rem;}
+            table th,table td {font-size:0.9rem;}
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -19,7 +46,7 @@
         <p>Email: <strong>nontakorn.ppc@gmail.com</strong></p>
         
         <section class="admin-section">
-            <h2>Member List (156 members)</h2>
+            <h2>Member List (<span id="memberCountBadge">0</span> members)</h2>
             <div class="table-container">
                 <table id="memberTable">
                     <thead>
@@ -50,8 +77,8 @@
         
         <section class="admin-section">
             <h2>Commission Calculator</h2>
-            <input type="number" id="memberCount" placeholder="จำนวนสมาชิก" value="156">
-            <p>ค่าคมิชชั่น: <strong id="commissionResult">46644฿</strong></p>
+            <input type="number" id="memberCount" placeholder="จำนวนสมาชิก" value="4">
+            <p>ค่าคมิชชั่น: <strong id="commissionResult">0฿</strong></p>
         </section>
         
         <section class="admin-section">
@@ -59,7 +86,80 @@
             <div id="activityFeed"></div>
         </section>
     </main>
-    
-    <script src="script.js"></script>
+    <script>
+    // mock member data
+    const members = [
+        {id:1,name:"สมชาย",email:"somchai@example.com",phone:"0811111111",status:"Active",vip:true,joined:"2024-02-12",sales:15500},
+        {id:2,name:"อรุณ",email:"arun@gmail.com",phone:"0862222222",status:"Active",vip:false,joined:"2025-03-18",sales:7350},
+        {id:3,name:"วรรณ",email:"wann@example.com",phone:"0833333333",status:"Inactive",vip:false,joined:"2025-05-21",sales:0},
+        {id:4,name:"พิชัย",email:"pichai@love.com",phone:"0872223344",status:"Active",vip:true,joined:"2025-01-09",sales:23794}
+    ];
+    // table render
+    function renderTable(list) {
+        document.getElementById('memberTableBody').innerHTML = list.map(
+            m => `<tr>
+                    <td>${m.id}</td>
+                    <td>${m.name}</td>
+                    <td>${m.email}</td>
+                    <td>${m.phone}</td>
+                    <td>${m.status}</td>
+                    <td>${m.vip ? '✅' : '-'}</td>
+                    <td>${m.joined}</td>
+                    <td>${m.sales}฿</td>
+                  </tr>`
+        ).join('');
+        document.getElementById('memberCountBadge').textContent = list.length;
+    }
+    // controls
+    let filtered = [...members];
+    renderTable(filtered);
+    document.getElementById('searchInput').oninput = function() {
+        const term = this.value.trim();
+        filtered = members.filter(m => m.name.includes(term) || m.email.includes(term) || m.phone.includes(term));
+        const vipSel = document.getElementById('filterVIP').value;
+        if(vipSel == "vip") filtered = filtered.filter(m => m.vip);
+        renderTable(filtered);
+    };
+    document.getElementById('filterVIP').onchange = function() {
+        const vipSel = this.value;
+        filtered = members;
+        if(vipSel == "vip") filtered = filtered.filter(m => m.vip);
+        const term = document.getElementById('searchInput').value.trim();
+        if(term) filtered = filtered.filter(m => m.name.includes(term) || m.email.includes(term) || m.phone.includes(term));
+        renderTable(filtered);
+    };
+
+    // export CSV
+    function exportCSV() {
+        const rows = filtered.map(m => [m.id,m.name,m.email,m.phone,m.status,m.vip?"VIP":"-",m.joined,m.sales]);
+        let csv = "ID,ชื่อ,อีเมล,เบอร์โทร,สถานะ,VIP,เข้าร่วม,ยอดขาย\n" + rows.map(r => r.join(",")).join("\n");
+        const blob = new Blob([csv],{type:'text/csv'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'members.csv';
+        a.click();
+    }
+
+    // commission calc
+    const commInput = document.getElementById('memberCount');
+    const commResult = document.getElementById('commissionResult');
+    function updateCommission() {
+        const n = parseInt(commInput.value)||0;
+        commResult.textContent = (n * 299).toLocaleString() + "฿";
+    }
+    commInput.oninput = updateCommission;
+    updateCommission();
+
+    // activity feed
+    const activities = [
+        {time:"12:44",text:"สมชาย สมัครสมาชิกเข้าฝากเงิน"},
+        {time:"12:46",text:"วรรณ อัปเดตเบอร์โทร"},
+        {time:"12:47",text:"คุณได้รับยอดขาย 7350฿ จาก อรุณ"}
+    ];
+    document.getElementById('activityFeed').innerHTML = activities.map(
+        a => `<div class="feed-item"><strong>${a.time}</strong> - ${a.text}</div>`
+    ).join('');
+
+    </script>
 </body>
 </html>
